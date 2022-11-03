@@ -87,8 +87,14 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
+    @Transactional
     public void deleteSupplierById(Integer id) {
-        supplierRepository.deleteById(id);
+        Optional<Supplier> supplier = supplierRepository.findById(id);
+        if (supplier.isPresent()) {
+            // Get address id of supplier to be deleted
+            Integer address_id = supplier.get().getAddress_id();
+            supplierRepository.deleteById(id);
+            addressRepository.deleteById(address_id);
+        }
     }
-
 }

@@ -48,6 +48,6 @@ public class SupplierController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSupplierById(@PathVariable(value = "id") Integer id) {
         supplierService.deleteSupplierById(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Record Deleted Successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Record Deleted Successfully");
     }
 }
