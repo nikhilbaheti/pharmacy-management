@@ -23,7 +23,7 @@ public class Supplier {
     private Integer supplier_id;
     private String supplier_name;
     private Integer address_id;
-    private Integer mobile_no;
+    private Long mobile_no;
     private String email_id;
     private String created_by;
     @CreationTimestamp
