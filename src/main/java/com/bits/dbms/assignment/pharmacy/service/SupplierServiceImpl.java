@@ -1,9 +1,13 @@
 package com.bits.dbms.assignment.pharmacy.service;
 
-import com.bits.dbms.assignment.pharmacy.dto.SupplierOrderRequestDTO;
+import com.bits.dbms.assignment.pharmacy.dto.AddressDTO;
+import com.bits.dbms.assignment.pharmacy.dto.SupplierAddressDTO;
+import com.bits.dbms.assignment.pharmacy.entity.Address;
 import com.bits.dbms.assignment.pharmacy.entity.Supplier;
+import com.bits.dbms.assignment.pharmacy.repository.AddressRepository;
 import com.bits.dbms.assignment.pharmacy.repository.SupplierRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -11,9 +15,11 @@ import java.util.*;
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final AddressRepository addressRepository;
 
-    public SupplierServiceImpl(SupplierRepository supplierRepository) {
+    public SupplierServiceImpl(SupplierRepository supplierRepository, AddressRepository addressRepository) {
         this.supplierRepository = supplierRepository;
+        this.addressRepository = addressRepository;
     }
 
     @Override
@@ -28,10 +34,30 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Supplier saveSupplier(Supplier supplier) {
-        supplier.setCreated_on(new Date());
-        supplier.setModified_on(null);
-        supplier.setModified_by(null);
+    @Transactional
+    public Supplier saveSupplier(SupplierAddressDTO supplierDTO) {
+        AddressDTO addressDTO = supplierDTO.getAddress();
+        Address supplierAddress = Address.builder()
+                .addressLine1(addressDTO.getAddressLine1())
+                .addressLine2(addressDTO.getAddressLine2())
+                .addressLine3(addressDTO.getAddressLine3())
+                .state(addressDTO.getState())
+                .city(addressDTO.getCity())
+                .country(addressDTO.getCountry())
+                .zip(addressDTO.getZip())
+                .created_by(supplierDTO.getCreated_by())
+                .build();
+
+        Address savedAddress = addressRepository.save(supplierAddress);
+
+        Supplier supplier = Supplier.builder()
+                .supplier_name(supplierDTO.getSupplier_name())
+                .address_id(savedAddress.getAddress_id())
+                .mobile_no(supplierDTO.getMobile_no())
+                .email_id(supplierDTO.getEmail_id())
+                .created_by(supplierDTO.getCreated_by())
+                .build();
+
         return supplierRepository.save(supplier);
     }
 
@@ -56,7 +82,7 @@ public class SupplierServiceImpl implements SupplierService {
             supplierRepository.save(supplierDB);
             return supplierDB;
         } else {
-            return saveSupplier(supplier);
+            return supplierRepository.save(supplier);
         }
     }
 
@@ -65,11 +91,4 @@ public class SupplierServiceImpl implements SupplierService {
         supplierRepository.deleteById(id);
     }
 
-    @Override
-    public HashMap<Integer,Integer> orderProductsFromSupplier(SupplierOrderRequestDTO orderRequestDTO) {
-        // logic to fetch products from supplier
-        Supplier supplier = supplierRepository.getReferenceById(orderRequestDTO.getSupplier_id());
-
-        return new HashMap<>();
-    }
 }
